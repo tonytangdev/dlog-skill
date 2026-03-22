@@ -1,6 +1,6 @@
 ---
 name: dlog
-description: "Log and search decisions using the dlog CLI. Use this skill PROACTIVELY whenever the user makes a decision (e.g., 'let's use PostgreSQL', 'I'll go with approach B', 'we decided to split the service'), even if they don't explicitly ask to log it. Also use when the user wants to recall, find, or look up a past decision (e.g., 'what did we decide about X', 'why did I choose Y', 'find that decision about Z'). Trigger on any mention of decisions, choices, trade-offs being made or recalled — even casual ones like 'let's go with' or 'I think we should'."
+description: "Log and search decisions using the dlog CLI. Use this skill when the user makes a decision (e.g., 'let's use PostgreSQL', 'I'll go with approach B', 'we decided to split the service') or wants to recall/search a past decision (e.g., 'what did we decide about X', 'why did I choose Y'). By default, ASK the user before logging — do not log automatically unless the user has explicitly opted into automatic logging."
 ---
 
 # dlog — Decision Logger
@@ -17,17 +17,17 @@ Before running any dlog command, verify the user is set up:
 
 Only proceed with log/search commands once auth and team are confirmed.
 
-## Proactively logging decisions
+## Logging behavior
 
-When the user makes a decision during the conversation — even without asking you to log it — offer to capture it. Decisions look like:
+**Default: ask before logging.** When you detect a decision, ask: **"Want me to log this decision with dlog?"** — then run the command only after they confirm. One offer per decision is enough. If the user declines, move on. **Never log automatically unless the user has explicitly said to do so** (e.g., "log decisions automatically", "don't ask, just log them").
+
+Decisions look like:
 
 - Choosing one option over another ("let's go with X instead of Y")
 - Settling on an approach ("I'll use the factory pattern here")
 - Trade-off resolutions ("we'll accept the latency hit for simpler code")
 - Technology/tool choices ("switching from Jest to Vitest")
 - Architecture calls ("the API will be REST, not GraphQL")
-
-When you detect a decision, ask: **"Want me to log this decision with dlog?"** — then run the command only after they confirm. One offer per decision is enough. If the user declines, move on.
 
 ## Commands
 
