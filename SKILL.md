@@ -5,7 +5,7 @@ description: "Log and search decisions using the dlog CLI. Use this skill when t
 
 # dlog — Decision Logger
 
-dlog is a CLI tool for quickly capturing and searching decisions. It takes seconds to log a decision. After logging, an LLM enrichment process automatically adds outcome, reasoning, alternatives, and tags.
+dlog is a CLI tool for quickly capturing and searching decisions. It takes seconds to log a decision. After logging, an LLM enrichment process automatically adds outcome, reasoning, alternatives, and tags. When using `--no-enrich`, you provide these fields yourself.
 
 ## Prerequisites — check before any command
 
@@ -40,6 +40,11 @@ dlog log "decision text" -p <project>
 - **decision text**: concise summary of what was decided. Write it as a clear statement, not a question. Include the "why" if mentioned.
 - **-p project**: infer the project name from context — the current repo name, the project being discussed, or ask if unclear.
 - **--team slug**: optional, override the active team for this command.
+- **--no-enrich**: skip AI enrichment. Use this when you want to provide metadata fields yourself.
+- **--outcome text**: the decision outcome (what was chosen).
+- **--reasoning text**: why this decision was made.
+- **--alternatives a,b,c**: comma-separated list of alternatives that were considered.
+- **--tags x,y,z**: comma-separated tags for categorization.
 
 Keep decision text concise but self-contained — someone reading it months later should understand what was decided without extra context.
 
@@ -49,6 +54,19 @@ dlog log "Use PostgreSQL over MySQL for the user service — better JSON support
 ```
 
 Output: `Decision logged (id: <uuid>). Enrichment in progress.`
+
+**Example (with manual metadata, no AI):**
+```bash
+dlog log "Use PostgreSQL over MySQL for the user service" -p my-app --no-enrich \
+  --outcome "Chose PostgreSQL" \
+  --reasoning "Better JSON support and existing PG expertise" \
+  --alternatives "MySQL,SQLite,MongoDB" \
+  --tags "database,infrastructure"
+```
+
+Output: `Decision logged (id: <uuid>).`
+
+**When called by an LLM:** Always use `--no-enrich` and provide all metadata fields (`--outcome`, `--reasoning`, `--alternatives`, `--tags`). This avoids double AI processing and gives the LLM full control over the metadata.
 
 ### Search decisions
 
