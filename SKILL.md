@@ -5,17 +5,13 @@ description: "Log and search decisions using the dlog CLI. Use this skill when t
 
 # dlog — Decision Logger
 
-dlog is a CLI tool for quickly capturing and searching decisions. It takes seconds to log a decision. After logging, an LLM enrichment process automatically adds outcome, reasoning, alternatives, and tags. When using `--no-enrich`, you provide these fields yourself.
+dlog is a local-first CLI for capturing and searching decisions. Works offline — no login required. Decisions are stored locally in SQLite. You provide all metadata fields when logging.
 
-## Prerequisites — check before any command
+## No prerequisites needed
 
-Before running any dlog command, verify the user is set up:
+dlog works out of the box with no setup. Just run commands directly.
 
-1. **Logged in?** Run `dlog team list` — if it errors with "Not logged in", tell the user to run `dlog login` (this is interactive and requires their input — you cannot do it for them).
-2. **Has a team?** If `dlog team list` returns no teams, tell the user to run `dlog team create` or `dlog team join <code>`.
-3. **Active team set?** If the user wants to log to a specific team, they can use `--team <slug>` on any command or switch with `dlog use <slug>`.
-
-Only proceed with log/search commands once auth and team are confirmed.
+Optional: `dlog login` enables syncing decisions to a remote API for team collaboration.
 
 ## Logging behavior
 
@@ -39,8 +35,7 @@ dlog log "decision text" -p <project>
 
 - **decision text**: concise summary of what was decided. Write it as a clear statement, not a question. Include the "why" if mentioned.
 - **-p project**: infer the project name from context — the current repo name, the project being discussed, or ask if unclear.
-- **--team slug**: optional, override the active team for this command.
-- **--no-enrich**: skip AI enrichment. Use this when you want to provide metadata fields yourself.
+- **--no-enrich**: kept for compatibility (no-op locally). Use when providing metadata fields yourself.
 - **--outcome text**: the decision outcome (what was chosen).
 - **--reasoning text**: why this decision was made.
 - **--alternatives a,b,c**: comma-separated list of alternatives that were considered.
@@ -53,9 +48,9 @@ Keep decision text concise but self-contained — someone reading it months late
 dlog log "Use PostgreSQL over MySQL for the user service — better JSON support and existing PG expertise" -p my-app
 ```
 
-Output: `Decision logged (id: <uuid>). Enrichment in progress.`
+Output: `Decision logged (id: <uuid>).`
 
-**Example (with manual metadata, no AI):**
+**Example (with metadata):**
 ```bash
 dlog log "Use PostgreSQL over MySQL for the user service" -p my-app --no-enrich \
   --outcome "Chose PostgreSQL" \
@@ -66,7 +61,7 @@ dlog log "Use PostgreSQL over MySQL for the user service" -p my-app --no-enrich 
 
 Output: `Decision logged (id: <uuid>).`
 
-**When called by an LLM:** Always use `--no-enrich` and provide all metadata fields (`--outcome`, `--reasoning`, `--alternatives`, `--tags`). This avoids double AI processing and gives the LLM full control over the metadata.
+**When called by an LLM:** Always use `--no-enrich` and provide all metadata fields (`--outcome`, `--reasoning`, `--alternatives`, `--tags`). This gives the LLM full control over the metadata.
 
 ### Search decisions
 
@@ -74,7 +69,7 @@ Output: `Decision logged (id: <uuid>).`
 dlog search "query" --limit <n>
 ```
 
-- **query**: keywords or natural language describing what to find
+- **query**: keywords describing what to find (uses full-text search locally)
 - **--limit**: max results (default 5, increase only if user asks)
 
 Returns a table: index number, short ID, project, decision summary, date.
@@ -85,7 +80,7 @@ Returns a table: index number, short ID, project, decision summary, date.
 dlog view <id>
 ```
 
-Use the numeric index from search/list results (e.g., `dlog view 1`) or a full UUID. Shows enriched fields: outcome, reasoning, alternatives, tags.
+Use the numeric index from search/list results (e.g., `dlog view 1`) or a full UUID. Shows fields: outcome, reasoning, alternatives, tags.
 
 ### List recent decisions
 
@@ -94,6 +89,16 @@ dlog list --limit <n> --project <name>
 ```
 
 Browse recent decisions with optional filters.
+
+### Sync (online-only)
+
+```bash
+dlog sync
+```
+
+Manually sync local decisions with the remote API. Requires `dlog login` first.
+
+Sync also runs automatically in the background when logged in (every 5 minutes).
 
 ## Searching for past decisions
 
